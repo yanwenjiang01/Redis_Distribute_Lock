@@ -1,0 +1,20 @@
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 8800
+  context-path: /
+spring:
+  redis:
+    database: 0
+    host: 119.3.182.194
+    port: 6379
+    password: ict2020.
+    pool:
+        max-active: 50
+        max-wait: 3000
+        max-idle: 30
+        min-idle: 30
+        timeout: 1000
+        defaultExpiration: 3600
+
+debug: false
