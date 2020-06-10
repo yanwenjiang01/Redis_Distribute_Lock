@@ -45,7 +45,7 @@ public class RedisClient {
      * @param expireTime
      * @param timeUnit
      */
-    public void set(String key, String value, long expireTime, TimeUnit timeUnit) {
+    public void set(String key, String value, Long expireTime, TimeUnit timeUnit) {
         stringRedisTemplate.opsForValue().set(key, value, expireTime, timeUnit);
     }
 
@@ -67,7 +67,7 @@ public class RedisClient {
      * @param expireTime
      * @param timeUnit
      */
-    public void set(String key, Object value, long expireTime, TimeUnit timeUnit) {
+    public void set(String key, Object value, Long expireTime, TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, expireTime, timeUnit);
     }
 
@@ -90,7 +90,7 @@ public class RedisClient {
      * @param timeUnit
      * @return
      */
-    public Boolean setNX(String key, Object value, long expireTime, TimeUnit timeUnit) {
+    public Boolean setNX(String key, Object value, Long expireTime, TimeUnit timeUnit) {
         return redisTemplate.execute(new SessionCallback<Boolean>() {
             @Override
             public Boolean execute(RedisOperations redisOperations) throws DataAccessException {
@@ -161,7 +161,7 @@ public class RedisClient {
      * @param unit
      * @return
      */
-    public Boolean expire(String key,long timeout,TimeUnit unit){
+    public Boolean expire(String key,Long timeout,TimeUnit unit){
         return redisTemplate.expire(key, timeout, unit);
     }
 
