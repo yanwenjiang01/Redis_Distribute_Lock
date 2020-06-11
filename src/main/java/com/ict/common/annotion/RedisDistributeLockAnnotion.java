@@ -15,9 +15,9 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RedisDistributeLock {
+public @interface RedisDistributeLockAnnotion {
     @AliasFor("value")
-    String key();
+    String key() default "";
     @AliasFor("key")
     String value() default "";
 

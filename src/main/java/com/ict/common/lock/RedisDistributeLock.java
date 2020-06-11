@@ -1,4 +1,4 @@
-package com.ict.common.redis;
+package com.ict.common.lock;
 
 
 import org.springframework.util.Assert;
@@ -28,7 +28,7 @@ public class RedisDistributeLock {
 
 
     private RedisDistributeLock(RedisClient redisClient, String key, Long maxLockTime) {
-        Assert.isNull(redisClient, "redisClient不能为空");
+        Assert.notNull(redisClient, "redisClient不能为空");
         Assert.hasText(key, "key不能为空");
         this.redisClient = redisClient;
         this.key = key;
@@ -59,10 +59,10 @@ public class RedisDistributeLock {
         if (aBoolean){
             isLock = true;
             return true;
-        }else {
-            isLock = false;
-            return false;
         }
+        isLock = false;
+        return false;
+
     }
 
     /**

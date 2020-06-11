@@ -1,6 +1,7 @@
-package com.ict.common.redis;
+package com.ict.common.lock;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,10 +22,13 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisClient {
 
-    @Resource(name = "redisTemplate")
+    @Autowired()
+    @Qualifier("redisTemplate")
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Resource(name = "stringRedisTemplate")
+
+    @Autowired()
+    @Qualifier("stringRedisTemplate")
     private StringRedisTemplate stringRedisTemplate;
 
     /**

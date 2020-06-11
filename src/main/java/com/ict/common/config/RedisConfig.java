@@ -10,13 +10,17 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.*;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.time.Duration;
 
 /**
  * @author: DevWenjiang
@@ -29,6 +33,14 @@ public class RedisConfig {
 
     @Value("${spring.redis.defaultExpiration:3600}")
     private Long defaultExpiration;
+    /**
+     * 创建JedisPoolConfig对象
+     */
+    @Bean
+    @ConfigurationProperties(prefix = "spring.redis")
+    public JedisPoolConfig jedisPoolConfig(){
+        return new JedisPoolConfig();
+    }
 
     /**
      * 创建JedisConnectionFactory对象
@@ -43,19 +55,12 @@ public class RedisConfig {
         return jedisConnectionFactory;
     }
 
-    /**
-     * 创建JedisPoolConfig对象
-     */
-    @Bean
-    @ConfigurationProperties(prefix = "spring.redis")
-    public JedisPoolConfig jedisPoolConfig(){
-        return new JedisPoolConfig();
-    }
+
 
 
     @Bean
     public RedisTemplate<String,Object> jdkRedisTemplate(){
-        RedisTemplate jdkRedisTemplate = new RedisTemplate();
+        RedisTemplate<String,Object> jdkRedisTemplate = new RedisTemplate<>();
         jdkRedisTemplate.setConnectionFactory(jedisConnectionFactory());
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         jdkRedisTemplate.setHashKeySerializer(stringRedisSerializer);
@@ -69,8 +74,8 @@ public class RedisConfig {
      * @return
      */
     @Bean
-    public RedisTemplate redisTemplate(){
-        RedisTemplate redisTemplate = new RedisTemplate();
+    public RedisTemplate<String,Object> redisTemplate(){
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(jedisConnectionFactory());
         Jackson2JsonRedisSerializer<?> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         //设置对象mapper
@@ -96,15 +101,22 @@ public class RedisConfig {
     }
 
     /**
-     * 设置缓存管理
+     * 缓存管理器
      */
     @Bean
-    @ConfigurationProperties("spring.redis")
-    public CacheManager cacheManager(){
-        RedisCacheManager redisCacheManager = new RedisCacheManager(redisTemplate());
-        redisCacheManager.setDefaultExpiration(defaultExpiration);
-        return redisCacheManager;
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+        //初始化一个RedisCacheWriter
+        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory);
+        //设置CacheManager的值序列化方式为json序列化
+        RedisSerializer<Object> jsonSerializer = new GenericJackson2JsonRedisSerializer();
+        RedisSerializationContext.SerializationPair<Object> pair = RedisSerializationContext.SerializationPair
+                .fromSerializer(jsonSerializer);
+        RedisCacheConfiguration defaultCacheConfig=RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(pair);
+        //设置默认超过期时间是30秒
+        defaultCacheConfig.entryTtl(Duration.ofSeconds(30));
+        //初始化RedisCacheManager
+        return new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
     }
-
 
 }
